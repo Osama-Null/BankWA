@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @inject SignInManager<AppUser> _signInManager
+@inject UserManager<AppUser> _userManager
 
 <!DOCTYPE html>
 <html>
@@ -59,16 +60,23 @@
 							<ul>
 								@if (_signInManager.IsSignedIn(User))
 								{
-									<li>
-										<form asp-action="LogoutPost" asp-controller="Account" method="post">
-											<input type="submit" class="text-submit" value="Logout">
-										</form>
-									</li>
-									<span class="text-white">
-										@User.Identity!.Name
-									</span>
+									var user = await _userManager.GetUserAsync(User);
+									var userImage = string.IsNullOrEmpty(user?.Img) ? "~/images/default-user.png" : user.Img;
 									
-									
+									<div class="user-image">
+										<img src="@Url.Content(userImage)" alt="User Image" class="img-fluid rounded-circle" />
+									</div>
+									var userId = _userManager.GetUserId(User);
+									<ul class="info-list">
+										<li>@User.Identity!.Name</li>
+										<li><a asp-action="EditProfile" asp-controller="Account" asp-route-id="@userId" class="text-white hvr-outline-out"><b>Edit</b></a></li>
+										<li>
+											<form asp-action="LogoutPost" asp-controller="Account" method="post">
+												<input type="submit" class="text-submit" value="Logout">
+											</form>
+										</li>
+										
+									</ul>
 
 									@if (User.IsInRole("Admin"))
 									{

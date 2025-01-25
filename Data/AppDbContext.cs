@@ -11,5 +11,6 @@ namespace BankWA.Data
 
         // Entity
         public DbSet<Transaction> Transactions { get; set; }
+        
     }
 }

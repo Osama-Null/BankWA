@@ -23,6 +23,8 @@ namespace BankWA.Models
         public TransactionType Type { get; set; } // Transaction type (e.g., Transfer, Deposit, Withdraw)
 
         public string? ReceiverId { get; set; } // Optional: Receiver ID for transfer transactions
+        [ForeignKey("ReceiverId")]
+        public AppUser? Receiver { get; set; } // Navigation property for Receiver
     }
     public enum TransactionType
     {

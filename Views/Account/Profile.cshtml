@@ -4,40 +4,103 @@
 @inject UserManager<AppUser> _userManager;
 
 @{
-	ViewData["Title"] = "Profile";
+    ViewData["Title"] = "Profile";
 }
 
-<link href="~/css/style3.css" rel="stylesheet" />
+@{
+    var user = await _userManager.GetUserAsync(User);
+}
 
-<div class="card">
-	<h2 class="user-name">@User.Identity!.Name</h2>
-	<p class="balance">Available Balance: $1,234.56</p>
-	<div class="buttons">
-		<button class="btn send">Send</button>
-		<button class="btn deposit">Deposit</button>
-		<button class="btn withdraw">Withdraw</button>
-	</div>
+<link href="~/css/bootstrap.css" rel="stylesheet" />
+<img src="#" alt="Alternate Text" />
+<div class="card user-card">
+    <h2 class="user-name">@User.Identity!.Name</h2>
+    <p class="balance">Available Balance: $@user!.Balance</p>
+    <div class="buttons">
+        <a asp-action="Transfer" asp-controller="Account" class="btn send">Send</a>
+        <a asp-action="Deposit" asp-controller="Account" class="btn deposit">Deposit</a>
+        <a asp-action="Withdraw" asp-controller="Account" class="btn withdraw">Withdraw</a>
+    </div>
 </div>
 <br />
 <div>
-	<h2 class="table-header">My Transactions</h2>
-	<table class="table">
-		<thead>
-			<tr>
-				<th>Date</th>
-				<th>Amount</th>
-				<th>Type</th>
-			</tr>
-		</thead>
-		<tbody>
-			@foreach (var transaction in Model)
-			{
-				<tr>
-					<td>@transaction.Date.ToString("g")</td>
-					<td>$@transaction.Amount</td>
-					<td>@transaction.Type</td>
-				</tr>
-			}
-		</tbody>
-	</table>
+    <h2 class="table-header">My Transactions</h2>
+    
+    <div class="d-flex justify-content-end align-items-center">
+        <div class="form-inline mb-3 me-3">
+            <input id="myInput" type="text" class="form-control" placeholder="Search by amount or date" />
+        </div>
+        <button class="btn btn-secondary" type="button" data-toggle="collapse" data-target="#filterMenu" aria-expanded="false" aria-controls="filterMenu">
+            Filter
+        </button>
+    </div>
+
+
+    <div class="collapse" id="filterMenu">
+        <div class="filter-card card-body mb-3">
+            <form method="get" asp-action="Profile" class="form-inline">
+                <div class="form-group mr-2">
+                    <input type="text" name="searchString" class="form-control" placeholder="Search by amount or date" value="@ViewData["SearchString"]" />
+                </div>
+                <div class="form-group mr-2">
+                    <input type="date" name="startDate" class="form-control" value="@ViewData["StartDate"]" />
+                </div>
+                <div class="form-group mr-2">
+                    <input type="date" name="endDate" class="form-control" value="@ViewData["EndDate"]" />
+                </div>
+                <div class="form-group mr-2">
+                    <input type="number" name="minAmount" class="form-control" placeholder="Min Amount" value="@ViewData["MinAmount"]" />
+                </div>
+                <div class="form-group mr-2">
+                    <input type="number" name="maxAmount" class="form-control" placeholder="Max Amount" value="@ViewData["MaxAmount"]" />
+                </div>
+                <div class="form-group mr-2">
+                    <button type="submit" class="btn btn-primary">Apply Filter</button>
+                </div>
+                <div class="form-group">
+                    <a href="@Url.Action("Profile", "Account")" class="btn btn-secondary">Clear Filter</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <table class="table" id="myTable">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Amount</th>
+                <th>Type</th>
+                <th>To</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var transaction in Model)
+            {
+                <tr>
+                    <td>@transaction.Date.ToString("g")</td>
+                    <td>$@transaction.Amount</td>
+                    <td>@transaction.Type</td>
+                    <td>@transaction.Receiver?.Email</td>
+                </tr>
+            }
+        </tbody>
+    </table>
 </div>
+
+@section Scripts {
+    <script src="~/js/jquery.js"></script>
+    <script src="~/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $("#myInput").on("keyup", function() {
+                var value = $(this).val().toLowerCase();
+                $("#myTable tr").filter(function() {
+                    $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+                });
+            });
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+

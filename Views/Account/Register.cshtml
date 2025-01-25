@@ -11,6 +11,11 @@
     <form method="post" asp-action="Register" asp-controller="Account">
         <div asp-validation-summary="All" class="text-danger"></div>
         <div class="inputBox">
+            <input type="text" asp-for="Name">
+            <label asp-for="Name">Name</label>
+            <span asp-validation-for="Name"></span>
+        </div>
+        <div class="inputBox">
             <input type="text" asp-for="Email">
             <label asp-for="Email">Email</label>
             <span asp-validation-for="Email"></span>

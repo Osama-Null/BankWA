@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Hosting;
+using System.IO;
+using System;
 
 namespace BankWA.Controllers
 {
@@ -71,10 +73,11 @@ namespace BankWA.Controllers
 
             AppUser user = new AppUser
             {
-                UserName = model.Email,
+                UserName = model.Name,
                 Email = model.Email,
                 PhoneNumber = model.Mobile,
             };
+
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
             {
@@ -88,7 +91,9 @@ namespace BankWA.Controllers
             return RedirectToAction("Login");
         }
 
-        public async Task<IActionResult> Profile()
+        
+
+        public async Task<IActionResult> Profile(string searchString, DateTime? startDate, DateTime? endDate, decimal? minAmount, decimal? maxAmount)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -96,9 +101,36 @@ namespace BankWA.Controllers
                 return RedirectToAction("Login");
             }
 
-            var transactions = await _context.Transactions.Where(t => t.UserId == user.Id).ToListAsync();
+            var transactions = _context.Transactions.Include(t => t.Receiver).Where(t => t.UserId == user.Id);
 
-            return View(transactions);
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                transactions = transactions.Where(t => t.Amount.ToString().Contains(searchString) || t.Date.ToString("g").Contains(searchString));
+            }
+
+            if (startDate.HasValue)
+            {
+                transactions = transactions.Where(t => t.Date >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                transactions = transactions.Where(t => t.Date <= endDate.Value);
+            }
+
+            if (minAmount.HasValue)
+            {
+                transactions = transactions.Where(t => t.Amount >= minAmount.Value);
+            }
+
+            if (maxAmount.HasValue)
+            {
+                transactions = transactions.Where(t => t.Amount <= maxAmount.Value);
+            }
+
+            var filteredTransactions = await transactions.ToListAsync();
+
+            return View(filteredTransactions);
         }
 
         public async Task<IActionResult> Logout()
@@ -115,21 +147,17 @@ namespace BankWA.Controllers
         }
 
         //==================DEPOSIT==================\\
-        public async Task<IActionResult> Deposit(string? id)
+        public async Task<IActionResult> Deposit()
         {
-            if (id == null || string.IsNullOrEmpty(id))
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
             {
-                return RedirectToAction("Deposit");
+                return RedirectToAction("Login");
             }
 
-            var acco = await _userManager.FindByIdAsync(id);
-            if (acco == null || string.IsNullOrEmpty(acco.Email))
-            {
-                return RedirectToAction("Deposit");
-            }
             TransactionViewModel model = new TransactionViewModel
             {
-                UserId = acco.Id,
+                UserId = user.Id,
                 AmountVM = 0, // Initialize with 0 or any default value
                 DateVM = DateTime.Now,
             };
@@ -163,8 +191,9 @@ namespace BankWA.Controllers
             _context.Users.Update(account);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("AccountDetails", new { id = model.UserId });
+            return RedirectToAction("Profile");
         }
+
 
         //==================WITHDRAW==================\\
         public IActionResult Withdraw()
@@ -206,8 +235,11 @@ namespace BankWA.Controllers
         }
 
         //==================TRANSFER==================\\
-        public IActionResult Transfer()
+        public async Task<IActionResult> Transfer()
         {
+            var currentUser = await _userManager.GetUserAsync(User);
+            var users = await _userManager.Users.Where(u => u.Id != currentUser.Id).ToListAsync();
+            ViewBag.ReceiverEmails = new SelectList(users, "Email", "Email");
             return View();
         }
         [HttpPost]
@@ -215,17 +247,22 @@ namespace BankWA.Controllers
         {
             if (!ModelState.IsValid)
             {
+                var users = await _userManager.Users.ToListAsync();
+                ViewBag.ReceiverEmails = new SelectList(users, "Email", "Email");
                 return View(model);
             }
-            var sender = await _userManager.FindByIdAsync(model.SenderId);
-            var receiver = await _userManager.FindByIdAsync(model.ReceiverId);
+
+            var sender = await _userManager.GetUserAsync(User);
+            var receiver = await _userManager.FindByEmailAsync(model.ReceiverEmail);
             if (sender == null || receiver == null)
             {
-                return RedirectToAction("Account");
+                return RedirectToAction("Profile");
             }
             if (sender.Balance < model.Amount)
             {
                 ModelState.AddModelError("", "Insufficient balance.");
+                var users = await _userManager.Users.ToListAsync();
+                ViewBag.ReceiverEmails = new SelectList(users, "Email", "Email");
                 return View(model);
             }
             sender.Balance -= model.Amount;
@@ -233,11 +270,11 @@ namespace BankWA.Controllers
 
             var transaction = new Transaction
             {
-                UserId = model.SenderId,
+                UserId = sender.Id,
                 Amount = -model.Amount,
                 Date = DateTime.UtcNow,
                 Type = TransactionType.Transfer,
-                ReceiverId = model.ReceiverId
+                ReceiverId = receiver.Id
             };
 
             await _context.Transactions.AddAsync(transaction);
@@ -245,7 +282,90 @@ namespace BankWA.Controllers
             _context.Users.Update(receiver);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("AccountDetails", new { id = model.SenderId });
+            return RedirectToAction("Profile");
+        }
+        //=======================EDIT==================\\
+        //[Authorize(Roles = "Admin")]
+        public async Task<IActionResult> EditProfile(string? id)
+        {
+            if (id == null)
+            {
+                return RedirectToAction("Profile");
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var model = new EditProfileViewModel
+            {
+                Email = user.Email,
+                Mobile = user.PhoneNumber,
+            };
+
+            return View(model);
+        }
+        [HttpPost]
+        public async Task<IActionResult> EditProfile(string id, EditProfileViewModel model)
+        {
+            if (id == null)
+            {
+                return RedirectToAction("Profile");
+            }
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            if (!string.IsNullOrEmpty(model.Password))
+            {
+                var passwordCheck = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
+                if (!passwordCheck.Succeeded)
+                {
+                    ModelState.AddModelError(string.Empty, "*Invalid password");
+                    return View(model);
+                }
+            }
+            
+            if (!string.IsNullOrEmpty(model.Mobile))
+            {
+                user.PhoneNumber = model.Mobile;
+            }
+
+            string? imageUrl = null;
+
+            if (!string.IsNullOrEmpty(model.Img.ToString()))
+            {
+                
+                if (model.Img != null && model.Img.Length > 0)
+                {
+                    var fileName = Path.GetFileName(model.Img.FileName);
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/css/Users/Images", fileName);
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.Img.CopyToAsync(fileStream);
+                    }
+                    imageUrl = $"~/css/Users/Images/{fileName}";
+                }
+
+                user.Img = imageUrl;
+            }
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return View(model);
+            }
+
+            return RedirectToAction("Profile");
         }
         //============================================\\
         //public string UploadFile(IFormFile Image)

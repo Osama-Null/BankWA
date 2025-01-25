@@ -1,9 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 
 namespace BankWA.Models.ViewModels
 {
     public class RegisterViewModel
     {
+        [Required(ErrorMessage = "*Enter name")]
+        [MinLength(3)]
+        public string Name { get; set; }
         // Email, ConfirmEmail, Password, ConfirmPassword, Mobile
         [Required(ErrorMessage = "*Enter email")]
         [EmailAddress]
@@ -16,6 +20,8 @@ namespace BankWA.Models.ViewModels
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "*Not match!")]
         public string ConfirmPassword { get; set; }
+        [Required(ErrorMessage = "*Eneter phone")]
+        [DataType(DataType.PhoneNumber)]
         public string Mobile { get; set; }
     }
 }
