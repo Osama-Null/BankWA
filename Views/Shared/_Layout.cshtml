@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<AppUser> _signInManager
+
+<!DOCTYPE html>
 <html>
 <head>
 	<meta charset="utf-8">
@@ -7,7 +10,7 @@
 	<link href="~/css/bootstrap.css" rel="stylesheet">
 	<link href="~/css/style.css" rel="stylesheet">
 	<link href="~/css/responsive.css" rel="stylesheet">
-
+	<link href="~/css/style5.css" rel="stylesheet" />
 	<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Nunito+Sans:wght@300;600;700;800;900&display=swap" rel="stylesheet">
 
 	<!-- Color Switcher Mockup -->
@@ -53,8 +56,39 @@
 						<!-- Top Right -->
 						<div class="top-right pull-right">
 							<!-- Social Box -->
-							<ul class="social-box">
-								<a href="#" class="text-white hvr-outline-out"><b>Login | Register</b></a>
+							<ul>
+								@if (_signInManager.IsSignedIn(User))
+								{
+									<li>
+										<form asp-action="LogoutPost" asp-controller="Account" method="post">
+											<input type="submit" class="text-submit" value="Logout">
+										</form>
+									</li>
+									<span class="text-white">
+										@User.Identity!.Name
+									</span>
+									
+									
+
+									@if (User.IsInRole("Admin"))
+									{
+										<li>
+											<a asp-action="RolesList" asp-controller="Account">Roles List</a>
+										</li>
+									}
+								}
+								else
+								{
+									<li>
+										<a asp-action="Login" asp-controller="Account" class="text-white hvr-outline-out"><b>Login</b></a>
+									</li>
+									<li> | </li>
+									<li>
+										<ul class="social-box">
+											<a asp-action="Register" asp-controller="Account" class="text-white hvr-outline-out"><b>Register</b></a>
+										</ul>
+									</li>
+								}
 							</ul>
 						</div>
 
@@ -67,7 +101,7 @@
 				<div class="auto-container clearfix">
 
 					<div class="pull-left logo-box">
-						<div class="logo"><a href="index.html"><img src="images/logo.svg.png" alt="" title=""></a></div>
+						<div class="logo"><a asp-action="Index" asp-controller="Home"><img src="images/logo.svg.png" alt="" title=""></a></div>
 					</div>
 
 					<div class="nav-outer clearfix">
@@ -86,12 +120,12 @@
 
 							<div class="navbar-collapse collapse clearfix" id="navbarSupportedContent">
 								<ul class="navigation clearfix">
-									<li><a href="#">Home</a></li>
+									<li><a asp-action="Profile" asp-controller="Account">My Account</a></li>
+									<li><a asp-action="Index" asp-controller="Home">Home</a></li>
 									<li class="dropdown">
 										<a href="#">About</a>
 										<ul>
 											<li><a href="about.html">About Us</a></li>
-											<li><a href="faq.html">Faq</a></li>
 											<li><a href="team.html">Team</a></li>
 										</ul>
 									</li>

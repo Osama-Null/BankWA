@@ -1,0 +1,35 @@
+﻿@model LoginViewModel
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+
+<link href="~/css/style2.css" rel="stylesheet" />
+<div class="background"></div>
+<div class="box">
+    <h2>Login</h2>
+    <form method="post" asp-action="Login" asp-controller="Account">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="inputBox">
+            <input type="text" asp-for="Email">
+            <label asp-for="Email" class="white-label">Username</label>
+            <span asp-validation-for="Email"></span>
+        </div>
+        <div class="inputBox">
+            <input type="password" asp-for="Password">
+            <label asp-for="Password" class="white-label">Password</label>
+            <span asp-validation-for="Password"></span>
+        </div>
+        <div class="form-check form-switch">
+            <input asp-for="RememberMe" class="form-check-input btn-lg" type="checkbox">
+            <label class="form-check-label white-text">Remember me</label>
+        </div>
+        <input class="margin-top" type="submit" value="Login">
+        <div class="text-center text-white center-text">
+            <p>
+                Don't have an account? <a asp-action="Register" asp-controller="Account" class="gray-underline fw-bold text-body">Register</a>
+            </p>
+        </div>
+    </form>
+</div>
+

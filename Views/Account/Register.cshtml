@@ -1,0 +1,38 @@
+﻿@model RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = null;
+}
+
+<link href="~/css/style2.css" rel="stylesheet" />
+<div class="background"></div>
+<div class="box">
+    <h2>Register</h2>
+    <form method="post" asp-action="Register" asp-controller="Account">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="inputBox">
+            <input type="text" asp-for="Email">
+            <label asp-for="Email">Email</label>
+            <span asp-validation-for="Email"></span>
+        </div>
+
+        <div class="inputBox">
+            <input type="password" asp-for="Password">
+            <label asp-for="Password">Password</label>
+            <span asp-validation-for="Password"></span>
+        </div>
+        <div class="inputBox">
+            <input type="password" asp-for="ConfirmPassword">
+            <label asp-for="Password">Confirm Password</label>
+            <span asp-validation-for="ConfirmPassword"></span>
+        </div>
+
+        <div class="inputBox">
+            <input type="password" asp-for="Mobile">
+            <label asp-for="Password">Mobile</label>
+            <span asp-validation-for="Mobile"></span>
+        </div>
+        <input class="margin-top" type="submit" value="Register">
+    </form>
+</div>
+

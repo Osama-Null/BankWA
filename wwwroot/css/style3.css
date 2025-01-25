@@ -1,0 +1,88 @@
+﻿body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+.card {
+    background-color: rgba(128, 128, 128, 0.5);
+    color: white;
+    border-radius: 10px;
+    padding: 20px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
+}
+
+    .card h2 {
+        margin: 10px 0;
+        font-size: 1.5rem;
+    }
+
+    .card .balance {
+        margin: 10px 0;
+        font-size: 1.2rem;
+    }
+
+.buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 15px;
+}
+
+.btn {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+    .btn:hover {
+        background-color: #45a049;
+    }
+
+.transaction-history {
+    width: 90%;
+    max-width: 800px;
+    margin: 20px 0;
+    overflow-x: auto;
+}
+
+    .transaction-history h2 {
+        margin-bottom: 15px;
+        text-align: left;
+    }
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+    .table th, .table td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+    }
+
+    .table th {
+        background-color: #f4f4f4;
+    }
+
+    .table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .table tr:hover {
+        background-color: #f1f1f1;
+    }

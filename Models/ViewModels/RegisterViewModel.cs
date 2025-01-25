@@ -9,10 +9,6 @@ namespace BankWA.Models.ViewModels
         [EmailAddress]
         [MinLength(5)]
         public string Email { get; set; }
-        [Required(ErrorMessage = "*Re-enter email")]
-        [EmailAddress]
-        [Compare("Email", ErrorMessage = "*Not match!")]
-        public string ConfirmEmail { get; set; }
         [Required(ErrorMessage = "*Enter password")]
         [DataType(DataType.Password)]
         public string Password { get; set; }

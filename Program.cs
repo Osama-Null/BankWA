@@ -14,11 +14,6 @@ builder.Services.AddDbContext<AppDbContext>(Options =>
 });
 // Identity Config
 builder.Services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<AppDbContext>();
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.LoginPath = "/Account/RegisterLogin"; // Set the login path to your custom view
-    options.AccessDeniedPath = "/Account/AccessDenied"; // Optional: Set the access denied path
-});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Hosting;
 
 namespace BankWA.Controllers
 {
+    [Authorize]
     public class AccountController : Controller
     {
         #region InjectedServices
@@ -29,61 +30,62 @@ namespace BankWA.Controllers
         {
             return View();
         }
-        public IActionResult RegisterLogin()
+        [AllowAnonymous]
+        public IActionResult Login()
         {
             ViewBag.Roles = new SelectList(_roleManager.Roles, "RoleId", "Name");
             return View();
         }
+        [AllowAnonymous]
         [HttpPost]
-        public async Task<IActionResult> Register(RegisterLoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
-            ModelState.Remove("LoginVM");
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
+            if (!result.Succeeded)
+            {
+                ModelState.AddModelError("LoginError", "Invalid email or password.");
+                return View(model);
+            }
+            return RedirectToAction("Profile");
+        }
+        [AllowAnonymous]
+        public IActionResult Register()
+        {
+            ViewBag.Roles = new SelectList(_roleManager.Roles, "RoleId", "Name");
+            return View();
+        }
+        [AllowAnonymous]
+        [HttpPost]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
             if (!ModelState.IsValid)
             {
                 Console.WriteLine(ModelState);
                 ViewBag.Roles = new SelectList(_roleManager.Roles, "RoleId", "Name");
-                return View("RegisterLogin", model);
+                return View(model);
             }
 
             AppUser user = new AppUser
             {
-                UserName = model.RegisterVM.Email,
-                Email = model.RegisterVM.Email,
-                PhoneNumber = model.RegisterVM.Mobile,
+                UserName = model.Email,
+                Email = model.Email,
+                PhoneNumber = model.Mobile,
             };
-            var result = await _userManager.CreateAsync(user, model.RegisterVM.Password);
+            var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
             {
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(error.Code, error.Description);
                 }
-                return View("RegisterLogin", model);
+                return View(model);
             }
             await _signInManager.SignInAsync(user, isPersistent: false);
-            return RedirectToAction("RegisterLogin");
-        }
-        public IActionResult Login()
-        {
-            return RedirectToAction("RegisterLogin");
-        }
-
-        [AllowAnonymous]
-        [HttpPost]
-        public async Task<IActionResult> Login(RegisterLoginViewModel model)
-        {
-            ModelState.Remove("RegisterVM");
-            if (!ModelState.IsValid)
-            {
-                return View("RegisterLogin", model);
-            }
-            var result = await _signInManager.PasswordSignInAsync(model.LoginVM.Email, model.LoginVM.Password, model.LoginVM.RememberMe, false);
-            if (!result.Succeeded)
-            {
-                ModelState.AddModelError("LoginError", "Invalid email or password.");
-                return View("RegisterLogin", model);
-            }
-            return RedirectToAction("Profile");
+            return RedirectToAction("Login");
         }
 
         public async Task<IActionResult> Profile()
@@ -102,14 +104,14 @@ namespace BankWA.Controllers
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("RegisterLogin");
+            return RedirectToAction("Login");
         }
 
         [HttpPost]
         public async Task<IActionResult> LogoutPost()
         {
             await _signInManager.SignOutAsync();
-            return RedirectToAction("RegisterLogin");
+            return RedirectToAction("Login");
         }
 
         //==================DEPOSIT==================\\
@@ -246,21 +248,21 @@ namespace BankWA.Controllers
             return RedirectToAction("AccountDetails", new { id = model.SenderId });
         }
         //============================================\\
-        public string UploadFile(IFormFile Image)
-        {
-            string uniqueFileName = null;
+        //public string UploadFile(IFormFile Image)
+        //{
+        //    string uniqueFileName = null;
 
-            if (Image != null)
-            {
-                string uploadsFolder = Path.Combine(webHostEnvironment.WebRootPath, "Images");
-                uniqueFileName = Guid.NewGuid().ToString() + "_" + Image.FileName;
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    Image.CopyTo(fileStream);
-                }
-            }
-            return uniqueFileName;
-        }
+        //    if (Image != null)
+        //    {
+        //        string uploadsFolder = Path.Combine(webHostEnvironment.WebRootPath, "Images");
+        //        uniqueFileName = Guid.NewGuid().ToString() + "_" + Image.FileName;
+        //        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+        //        using (var fileStream = new FileStream(filePath, FileMode.Create))
+        //        {
+        //            Image.CopyTo(fileStream);
+        //        }
+        //    }
+        //    return uniqueFileName;
+        //}
     }
 } 
