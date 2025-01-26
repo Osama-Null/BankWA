@@ -1,0 +1,36 @@
+﻿@model TransactionViewModel
+
+@{
+    ViewData["Title"] = "Withdraw";
+}
+
+<link href="~/css/bootstrap.css" rel="stylesheet" />
+<link href="~/css/style3.css" rel="stylesheet" />
+
+<div class="container mt-5">
+    <h2 class="text-center">Withdraw Money</h2>
+    <form asp-action="Withdraw" method="post" class="mt-4">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <input type="hidden" asp-for="UserId" />
+        <div class="form-group">
+            <label asp-for="AmountVM" class="control-label"></label>
+            <input asp-for="AmountVM" class="form-control" />
+            <span asp-validation-for="AmountVM" class="text-danger"></span>
+        </div>
+        <div class="form-group text-center">
+            <input type="submit" value="Withdraw" class="btn btn-primary" />
+        </div>
+    </form>
+    <div class="text-center mt-3">
+        <a asp-action="Profile" class="btn btn-secondary">Back to Profile</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/jquery.js"></script>
+    <script src="~/js/bootstrap.bundle.min.js"></script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+

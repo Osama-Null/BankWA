@@ -11,15 +11,14 @@
     var user = await _userManager.GetUserAsync(User);
 }
 
-<link href="~/css/bootstrap.css" rel="stylesheet" />
-<img src="#" alt="Alternate Text" />
+<link href="~/css/style3.css" rel="stylesheet" />
 <div class="card user-card">
     <h2 class="user-name">@User.Identity!.Name</h2>
     <p class="balance">Available Balance: $@user!.Balance</p>
     <div class="buttons">
-        <a asp-action="Transfer" asp-controller="Account" class="btn send">Send</a>
-        <a asp-action="Deposit" asp-controller="Account" class="btn deposit">Deposit</a>
-        <a asp-action="Withdraw" asp-controller="Account" class="btn withdraw">Withdraw</a>
+        <a asp-action="Transfer" asp-controller="Account" class="btn btn-secondary">Send</a>
+        <a asp-action="Deposit" asp-controller="Account" class="btn btn-secondary">Deposit</a>
+        <a asp-action="Withdraw" asp-controller="Account" class="btn btn-secondary">Withdraw</a>
     </div>
 </div>
 <br />

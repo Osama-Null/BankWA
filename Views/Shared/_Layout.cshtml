@@ -62,10 +62,16 @@
 								{
 									var user = await _userManager.GetUserAsync(User);
 									var userImage = string.IsNullOrEmpty(user?.Img) ? "~/images/default-user.png" : user.Img;
-									
+
 									<div class="user-image">
 										<img src="@Url.Content(userImage)" alt="User Image" class="img-fluid rounded-circle" />
 									</div>
+
+									<ul class="social-box">
+										<li><a href="#" class="fa fa-facebook-f"></a></li>
+									</ul>
+
+
 									var userId = _userManager.GetUserId(User);
 									<ul class="info-list">
 										<li>@User.Identity!.Name</li>

@@ -35,7 +35,6 @@ namespace BankWA.Controllers
         [AllowAnonymous]
         public IActionResult Login()
         {
-            ViewBag.Roles = new SelectList(_roleManager.Roles, "RoleId", "Name");
             return View();
         }
         [AllowAnonymous]
@@ -196,10 +195,24 @@ namespace BankWA.Controllers
 
 
         //==================WITHDRAW==================\\
-        public IActionResult Withdraw()
+        public async Task<IActionResult> Withdraw()
         {
-            return View();
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            TransactionViewModel model = new TransactionViewModel
+            {
+                UserId = user.Id,
+                AmountVM = 0, // Initialize with 0 or any default value
+                DateVM = DateTime.Now,
+            };
+
+            return View(model);
         }
+
         [HttpPost]
         public async Task<IActionResult> Withdraw(TransactionViewModel model)
         {
@@ -210,7 +223,7 @@ namespace BankWA.Controllers
             var account = await _userManager.FindByIdAsync(model.UserId);
             if (account == null)
             {
-                return RedirectToAction("Account");
+                return RedirectToAction("Profile");
             }
             if (account.Balance < model.AmountVM)
             {
@@ -231,8 +244,10 @@ namespace BankWA.Controllers
             _context.Users.Update(account);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("AccountDetails", new { id = model.UserId });
+            return RedirectToAction("Profile");
         }
+
+
 
         //==================TRANSFER==================\\
         public async Task<IActionResult> Transfer()
@@ -330,7 +345,7 @@ namespace BankWA.Controllers
                     return View(model);
                 }
             }
-            
+
             if (!string.IsNullOrEmpty(model.Mobile))
             {
                 user.PhoneNumber = model.Mobile;
@@ -338,20 +353,15 @@ namespace BankWA.Controllers
 
             string? imageUrl = null;
 
-            if (!string.IsNullOrEmpty(model.Img.ToString()))
+            if (model.Img != null && model.Img.Length > 0)
             {
-                
-                if (model.Img != null && model.Img.Length > 0)
+                var fileName = Path.GetFileName(model.Img.FileName);
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/css/Users/Images", fileName);
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
-                    var fileName = Path.GetFileName(model.Img.FileName);
-                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/css/Users/Images", fileName);
-                    using (var fileStream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await model.Img.CopyToAsync(fileStream);
-                    }
-                    imageUrl = $"~/css/Users/Images/{fileName}";
+                    await model.Img.CopyToAsync(fileStream);
                 }
-
+                imageUrl = $"~/css/Users/Images/{fileName}";
                 user.Img = imageUrl;
             }
 
@@ -367,6 +377,8 @@ namespace BankWA.Controllers
 
             return RedirectToAction("Profile");
         }
+
+
         //============================================\\
         //public string UploadFile(IFormFile Image)
         //{

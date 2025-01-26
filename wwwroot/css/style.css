@@ -82,6 +82,33 @@
 
  ***/
 
+.profile-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center; /* Centers the content horizontally */
+	margin-top: 20px; /* Adds spacing from the top of the page */
+}
+
+.user-image {
+	width: 100px; /* Controls the size of the profile picture */
+	height: 100px;
+	overflow: hidden; /* Ensures the image doesn't overflow the container */
+}
+
+	.user-image img {
+		width: 100%; /* Makes the image fit the container */
+		height: 100%; /* Keeps it proportional */
+		object-fit: cover; /* Ensures proper cropping */
+		border-radius: 50%; /* Makes the image circular */
+	}
+
+.user-email {
+	margin-top: 10px;
+	font-size: 16px;
+	color: #333; /* Optional: Style for the email */
+	text-align: center;
+}
+
 body {
 	font-family: 'Nunito Sans', sans-serif;
 	font-size:14px;
