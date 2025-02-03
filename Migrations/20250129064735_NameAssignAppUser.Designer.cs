@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BankWA.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250125152205_UndoRoleFKCascading2Mig")]
-    partial class UndoRoleFKCascading2Mig
+    [Migration("20250129064735_NameAssignAppUser")]
+    partial class NameAssignAppUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -55,6 +55,9 @@ namespace BankWA.Migrations
 
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
@@ -111,7 +114,7 @@ namespace BankWA.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ReceiverId")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
@@ -121,6 +124,8 @@ namespace BankWA.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("TransactionId");
+
+                    b.HasIndex("ReceiverId");
 
                     b.HasIndex("UserId");
 
@@ -262,11 +267,17 @@ namespace BankWA.Migrations
 
             modelBuilder.Entity("BankWA.Models.Transaction", b =>
                 {
+                    b.HasOne("BankWA.Models.AppUser", "Receiver")
+                        .WithMany()
+                        .HasForeignKey("ReceiverId");
+
                     b.HasOne("BankWA.Models.AppUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Receiver");
 
                     b.Navigation("User");
                 });

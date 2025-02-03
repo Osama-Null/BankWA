@@ -61,27 +61,22 @@
 								@if (_signInManager.IsSignedIn(User))
 								{
 									var user = await _userManager.GetUserAsync(User);
-									var userImage = string.IsNullOrEmpty(user?.Img) ? "~/images/default-user.png" : user.Img;
-
-									<div class="user-image">
-										<img src="@Url.Content(userImage)" alt="User Image" class="img-fluid rounded-circle" />
-									</div>
-
-									<ul class="social-box">
-										<li><a href="#" class="fa fa-facebook-f"></a></li>
-									</ul>
-
+									var userImage = string.IsNullOrEmpty(user?.Img) ? "~/css/images/default-user.png" : user.Img;
 
 									var userId = _userManager.GetUserId(User);
 									<ul class="info-list">
-										<li>@User.Identity!.Name</li>
-										<li><a asp-action="EditProfile" asp-controller="Account" asp-route-id="@userId" class="text-white hvr-outline-out"><b>Edit</b></a></li>
+										<li>
+											<div class="user-image">
+												<a asp-action="EditProfile" asp-controller="Account" asp-route-id="@userId"><img src="@Url.Content(userImage)" alt="User Image" />&nbsp;@User.Identity!.Name</a>
+											</div>
+										</li>
+										<li><a asp-action="EditProfile" asp-controller="Account" asp-route-id="@userId" class="text-submit"><b>Edit</b></a></li>
 										<li>
 											<form asp-action="LogoutPost" asp-controller="Account" method="post">
 												<input type="submit" class="text-submit" value="Logout">
 											</form>
 										</li>
-										
+
 									</ul>
 
 									@if (User.IsInRole("Admin"))
@@ -148,7 +143,8 @@
 										<ul>
 											<li><a href="services-detail.html">Deposit</a></li>
 											<li><a href="services-detail.html">Withdraw</a></li>
-											<li><a href="services.html">Send</a></li>										</ul>
+											<li><a href="services.html">Send</a></li>
+										</ul>
 									</li>
 									<li><a href="contact.html">Contact us</a></li>
 								</ul>
@@ -297,7 +293,6 @@
 							<div class="row clearfix">
 
 								<!-- Footer Column -->
-
 								<!-- Footer Column -->
 								<div class="footer-column col-lg-6 col-md-6 col-sm-12">
 									<div class="footer-widget contact-widget">

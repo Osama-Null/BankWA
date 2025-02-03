@@ -7,5 +7,6 @@ namespace BankWA.Models
     {
         public decimal Balance { get; set; }
         public string? Img { get; set; }
+        public string Name { get; set; }
     }
 }

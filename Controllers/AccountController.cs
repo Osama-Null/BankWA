@@ -35,6 +35,10 @@ namespace BankWA.Controllers
         [AllowAnonymous]
         public IActionResult Login()
         {
+            if(_signInManager.IsSignedIn(User))
+            {
+                return RedirectToAction("Profile");
+            }
             return View();
         }
         [AllowAnonymous]
@@ -56,6 +60,10 @@ namespace BankWA.Controllers
         [AllowAnonymous]
         public IActionResult Register()
         {
+            if (_signInManager.IsSignedIn(User))
+            {
+                return RedirectToAction("Profile");
+            }
             ViewBag.Roles = new SelectList(_roleManager.Roles, "RoleId", "Name");
             return View();
         }
@@ -72,7 +80,8 @@ namespace BankWA.Controllers
 
             AppUser user = new AppUser
             {
-                UserName = model.Name,
+                Name = model.Name,
+                UserName = model.Email,
                 Email = model.Email,
                 PhoneNumber = model.Mobile,
             };
@@ -89,8 +98,6 @@ namespace BankWA.Controllers
             await _signInManager.SignInAsync(user, isPersistent: false);
             return RedirectToAction("Login");
         }
-
-        
 
         public async Task<IActionResult> Profile(string searchString, DateTime? startDate, DateTime? endDate, decimal? minAmount, decimal? maxAmount)
         {
@@ -351,17 +358,9 @@ namespace BankWA.Controllers
                 user.PhoneNumber = model.Mobile;
             }
 
-            string? imageUrl = null;
-
             if (model.Img != null && model.Img.Length > 0)
             {
-                var fileName = Path.GetFileName(model.Img.FileName);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/css/Users/Images", fileName);
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await model.Img.CopyToAsync(fileStream);
-                }
-                imageUrl = $"~/css/Users/Images/{fileName}";
+                var imageUrl = await ResizeImage(model.Img, user.Id);
                 user.Img = imageUrl;
             }
 
@@ -378,6 +377,34 @@ namespace BankWA.Controllers
             return RedirectToAction("Profile");
         }
 
+
+        private async Task<string> ResizeImage(IFormFile imageFile, string userId)
+        {
+            if (imageFile == null || imageFile.Length == 0)
+                return null;
+
+            var fileName = $"{userId}_{Path.GetFileName(imageFile.FileName)}";
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/css/Users/Images", fileName);
+
+            using (var stream = new MemoryStream())
+            {
+                await imageFile.CopyToAsync(stream);
+                using (var image = System.Drawing.Image.FromStream(stream))
+                {
+                    var resized = new System.Drawing.Bitmap(320, 320);
+                    using (var graphics = System.Drawing.Graphics.FromImage(resized))
+                    {
+                        graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                        graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                        graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                        graphics.DrawImage(image, 0, 0, 320, 320);
+                    }
+                    resized.Save(filePath);
+                }
+            }
+
+            return $"~/css/Users/Images/{fileName}";
+        }
 
         //============================================\\
         //public string UploadFile(IFormFile Image)
@@ -397,4 +424,4 @@ namespace BankWA.Controllers
         //    return uniqueFileName;
         //}
     }
-} 
+}

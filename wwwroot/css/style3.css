@@ -9,6 +9,10 @@
     color: #333;
 }
 
+.Go-Center {
+    justify-content: center;
+    padding: 20px;
+}
 .card {
     background-color: rgba(128, 128, 128, 0.5);
     color: white;
@@ -58,6 +62,7 @@
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
+
 .transaction-history {
     width: 90%;
     max-width: 800px;

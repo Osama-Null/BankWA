@@ -19,11 +19,13 @@ html, body {
     -webkit-filter: blur(8px); /* Apply blur effect for Safari */
     z-index: -1;
 }
+
 .gray-underline {
     color: #00b7ff;
     font-weight: bold;
     text-decoration: none;
 }
+
 .white-text {
     color: white;
 }
@@ -33,6 +35,7 @@ html, body {
     text-align: center;
     margin-top: 20px; /* Adjust the value as needed */
 }
+
 .margin-top {
     margin-top: 20px; /* Adjust the value as needed */
 }

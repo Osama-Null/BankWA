@@ -16,10 +16,12 @@ namespace BankWA.Models.ViewModels
         [Required(ErrorMessage = "*Enter password")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
+        [DisplayName("Re-Password")]
         [Required(ErrorMessage = "*Re-nter password")]
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "*Not match!")]
         public string ConfirmPassword { get; set; }
+        [DisplayName("Mobile")]
         [Required(ErrorMessage = "*Eneter phone")]
         [DataType(DataType.PhoneNumber)]
         public string Mobile { get; set; }
